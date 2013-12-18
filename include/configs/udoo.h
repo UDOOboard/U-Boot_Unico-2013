@@ -123,97 +123,45 @@
 #define CONFIG_DEFAULT_FDT_FILE		"imx6q-udoo.dtb"
 
 #define CONFIG_EXTRA_ENV_SETTINGS \
-	"script=boot.scr\0" \
+	"boot=echo No boot source specified\0" \
+	"src=sata\0" \
+	"bootdelay=5\0" \
+	"baudrate=115200\0" \
+	"loadaddr=0x12000000\0" \
 	"uimage=/boot/uImage\0" \
 	"console=ttymxc1\0" \
 	"splashpos=m,m\0" \
-	"fdt_high=0xffffffff\0" \
-	"initrd_high=0xffffffff\0" \
-	"fdt_file=" CONFIG_DEFAULT_FDT_FILE "\0" \
-	"fdt_addr=0x11000000\0" \
-	"boot_fdt=try\0" \
-	"ip_dyn=yes\0" \
+	"video=video=mxcfb0:dev=hdmi,1920x1080M@60,bpp=32\0" \
+	"memory=fbmem=24M gpu_reserved=128M\0" \
 	"hdmi_patch=\0" \
+	"mmcboot=if mmc rescan; then echo Booting from mmc ...; run mmcloaduimage; run mmcargs; bootm; else mmc boot failed; fi\0" \
 	"mmcdev=0\0" \
 	"mmcpart=1\0" \
 	"mmcroot=/dev/mmcblk0p1 rootwait rw\0" \
-	"update_sd_firmware_filename=u-boot.imx\0" \
-	"update_sd_firmware=" \
-	 "if test ${ip_dyn} = yes; then " \
-	 "setenv get_cmd dhcp; " \
-	 "else " \
-	 "setenv get_cmd tftp; " \
-	 "fi; " \
-	 "if mmc dev ${mmcdev}; then "	\
-	 "if ${get_cmd} ${update_sd_firmware_filename}; then " \
-	 "setexpr fw_sz ${filesize} / 0x200; " \
-	 "setexpr fw_sz ${fw_sz} + 1; "	\
-	 "mmc write ${loadaddr} 0x2 ${fw_sz}; " \
-	 "fi; "	\
-	 "fi\0" \
-	"mmcargs=setenv bootargs console=${console},${baudrate} " \
-	 "root=${mmcroot} " \
-	 "${hdmi_patch} " \
-	 "fbmem=24M video=mxcfb0:dev=hdmi,1920x1080M@60,bpp=32\0" \
-	"loadbootscript=" \
-	 "ext2load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0" \
-	"bootscript=echo Running bootscript from mmc ...; " \
-	 "source\0" \
-	"loaduimage=ext2load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${uimage}\0" \
-	"loadfdt=ext2load mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}\0" \
-	"mmcboot=echo Booting from mmc ...; " \
-	 "run mmcargs; " \
-	 "if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
-	 "if run loadfdt; then " \
-	 "bootm ${loadaddr} - ${fdt_addr}; " \
-	 "else " \
-	 "if test ${boot_fdt} = try; then " \
-	 "bootm; " \
-	 "else " \
-	 "echo WARN: Cannot load the DT; " \
-	 "fi; " \
-	 "fi; " \
-	 "else " \
-	 "bootm; " \
-	 "fi;\0" \
-	"netargs=setenv bootargs console=${console},${baudrate} " \
-	 "root=/dev/nfs " \
-	 "${hdmi_patch} " \
-	"ip=dhcp nfsroot=${serverip}:${nfsroot},v3,tcp\0" \
-	 "netboot=echo Booting from net ...; " \
-	 "run netargs; " \
-	 "if test ${ip_dyn} = yes; then " \
-	 "setenv get_cmd dhcp; " \
-	 "else " \
-	 "setenv get_cmd tftp; " \
-	 "fi; " \
-	 "${get_cmd} ${uimage}; " \
-	 "if test ${boot_fdt} = yes || test ${boot_fdt} = try; then " \
-	 "if ${get_cmd} ${fdt_addr} ${fdt_file}; then " \
-	 "bootm ${loadaddr} - ${fdt_addr}; " \
-	 "else " \
-	 "if test ${boot_fdt} = try; then " \
-	 "bootm; " \
-	 "else " \
-	 "echo WARN: Cannot load the DT; " \
-	 "fi; " \
-	 "fi; " \
-	 "else " \
-	 "bootm; " \
-	 "fi;\0"
+	"mmcargs=setenv bootargs console=${console},${baudrate} root=${mmcroot} ${hdmi_patch} ${memory} ${video}\0" \
+	"mmcloaduimage=ext2load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${uimage}\0" \
+	"sataboot=if sata init; then echo Booting from sata ...; run sataloaduimage; run sataargs; bootm; else sata boot failed; fi\0" \
+	"satadev=0\0" \
+	"satapart=1\0" \
+	"sataroot=/dev/sda1 rootwait rw\0" \
+	"sataargs=setenv bootargs console=${console},${baudrate} root=${sataroot} ${hdmi_patch} ${memory} ${video}\0" \
+	"sataloaduimage=ext2load sata ${satadev}:${satapart} ${loadaddr} ${uimage}\0" \
+	"ethprime=FEC\0" \
+	"ipaddr=dhcp\0" \
+	"serverip=192.192.1.1\0" \
+	"nfsroot=/src/nfs4/\0" \
+	"netargs=setenv bootargs console=${console},${baudrate} root=/dev/nfs ${hdmi_patch} ${memory} ${video} ip=${ipaddr} nfsroot=${serverip}:${nfsroot},v3,tcp\0" \
+	"netboot=echo Booting from net ...; run netargs; if test ${ipaddr} = dhcp; then setenv get_cmd dhcp; else setenv get_cmd tftp; fi; ${get_cmd} ${uimage}; bootm\0" \
+	"script=boot.scr\0" \
+	"loadbootscript=ext2load ${src} ${mmcdev}:${mmcpart} ${loadaddr} ${script};\0 " \
+	"bootscript=echo Running bootscript from ${src} ...; source\0"
 
 #define CONFIG_BOOTCOMMAND \
-	   "mmc dev ${mmcdev}; if mmc rescan; then " \
 	   "if run loadbootscript; then " \
 	   "run bootscript; " \
 	   "else " \
-	   "if run loaduimage; then " \
-	   "run mmcboot; " \
-	   "else run netboot; " \
-	   "fi; " \
-	   "fi; " \
-	   "else run netboot; fi"
-
+	   "run ${src}boot; run sataboot; run mmcboot; run netboot;" \
+	   "fi; "
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LONGHELP
 #define CONFIG_SYS_HUSH_PARSER
