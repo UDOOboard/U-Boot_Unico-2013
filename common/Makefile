@@ -52,6 +52,7 @@ COBJS-$(CONFIG_ENV_IS_IN_UBI) += env_ubi.o
 COBJS-$(CONFIG_ENV_IS_NOWHERE) += env_nowhere.o
 
 # command
+COBJS-$(CONFIG_CMD_MULTIBOOT) += cmd_multiboot.o
 COBJS-$(CONFIG_CMD_AMBAPP) += cmd_ambapp.o
 COBJS-$(CONFIG_SOURCE) += cmd_source.o
 COBJS-$(CONFIG_CMD_SOURCE) += cmd_source.o
