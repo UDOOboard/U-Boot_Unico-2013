@@ -273,6 +273,7 @@ static struct display_info_t const displays[] = {{
         .enable = do_enable_lvds,
         .mode   = {
 		// Rif. 800x480 Panel UMSH-8596MD-20T
+		// To activate write "setenv panel LDB-WVGA" or leave empty.
 		.name           = "LDB-WVGA",
 		.refresh        = 60,
 		.xres           = 800,
@@ -313,7 +314,8 @@ static struct display_info_t const displays[] = {{
         .detect = detect_lvds,
         .enable = do_enable_lvds,
         .mode   = {
-		// Rif. Panel 1024x768 Panel UMSH-8596MD-15T
+		// Rif. Panel 1024x768 - UMSH-8596MD-15T - G156XW01V0
+		// To activate write "setenv panel LDB-XGA".
 		.name           = "LDB-XGA",
 		.refresh        = 60,
 		.xres           = 1024,
@@ -335,6 +337,7 @@ static struct display_info_t const displays[] = {{
         .enable = do_enable_lvds,
         .mode   = {
 		// Rif. 1366x768 Panel CHIMEI M156B3-LA1
+		// To activate write "setenv panel LDB-WXGA".
 		.name           = "LDB-WXGA",
 		.refresh        = 59,
 		.xres           = 1368,
